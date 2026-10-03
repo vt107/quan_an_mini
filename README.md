@@ -18,6 +18,7 @@ npm install && npm run build
 
 - Web: http://localhost:8092 · Admin: http://localhost:8092/admin (`admin@quanan.test` / `password`)
 - Test: `make test`
+- Bản demo chỉ xem (nút "Demo" + tài khoản điền sẵn, chặn thêm / sửa / xoá): `DEMO_MODE=true` rồi `make artisan c="demo:reset --force"`. Xem mục "Chế độ demo" trong [CLAUDE.md](CLAUDE.md).
 
 ## Triển khai production
 

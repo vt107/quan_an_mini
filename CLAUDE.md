@@ -20,6 +20,17 @@ Chạy hoàn toàn bằng Docker. PHP trên máy host là 8.0 nên **không** ch
 - Admin: Tổng quan (thống kê thực đơn), Danh mục, Món ăn, Cài đặt (tab Thương hiệu / Trang chủ / Liên hệ / SEO). Mọi user đang hoạt động (`is_active`) đều là admin; không có quản lý tài khoản trong giao diện.
 - SEO: `partials/head` (title, description, Open Graph, JSON-LD Restaurant, Google Analytics), `robots.txt` / `sitemap.xml` động (`Site/SeoController`), bật / tắt index trong Cài đặt.
 
+## Chế độ demo (chỉ xem)
+
+Bản giới thiệu cho khách xem: `DEMO_MODE=true` (`config/demo.php`, mặc định tắt; `.env` local đang bật).
+
+- Mọi lệnh ghi SQL từ request web bị chặn (`App\Support\Demo\DemoMode`, `DB::beforeExecuting`), trừ `sessions` / `cache` và câu khớp `allowed_write_patterns` (remember_token, `last_login_at` khi đăng nhập). Form POST ngoài `allowed_routes` bị chặn trước controller; Livewire / Filament hiện toast `demo-blocked`; upload file dừng ở `_startUpload`. Artisan / test không bị chặn.
+- Nút "Demo" nổi (`resources/views/demo/widget.blade.php`, middleware toàn cục `InjectDemoWidget`) liệt kê khu vực + tài khoản trong `demo.portals`; login Filament điền sẵn (`App\Filament\Pages\Auth\Login`, `?demo=<key>`), `/demo/switch/{key}` đổi tài khoản.
+- Tài khoản demo: `admin@quanan.test` / `password` (chủ quán, vào `/admin`).
+- Dữ liệu: `php artisan demo:reset --force` (= `migrate:fresh --seed`, chỉ chạy khi demo bật). `DatabaseSeeder` gọi `DemoSeeder` thay `MenuSeeder` khi demo bật: quán mẫu "Bếp Nhà Mây", ảnh trong `database/seeders/demo` (CC0 / public domain, nguồn ở `sources.json`), SEO tắt index. Lịch reset hằng ngày `DEMO_RESET_AT` ở `routes/console.php` (cần cron chạy scheduler hoặc gọi thẳng lệnh, xem docs/deploy.md).
+- Toggle trong bảng Filament bị tắt ở bản demo (`->disabled(DemoMode::enabled())`) để công tắc không lệch với DB.
+- Thêm tính năng mới: thao tác có tác dụng ngoài DB (gửi mail / Telegram, gọi API, xoá file, xoá cache, chạy lệnh) phải gọi `DemoMode::abortIfEnabled()` đầu action; lệnh ghi bắt buộc khi chỉ xem trang thì whitelist hẹp trong `config/demo.php` hoặc `DemoMode::bypass()`; bổ sung dữ liệu mẫu vào `DemoSeeder` + test trong `tests/Feature/DemoModeTest.php`.
+
 ## Quy ước
 
 - `menu_items.is_active` = ẩn / hiện trên web; `is_available` = còn / tạm hết (vẫn hiện, có nhãn "Tạm hết"); `is_featured` = mục "Món nổi bật". Web dùng scope `visible()`.

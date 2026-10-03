@@ -94,3 +94,18 @@ Thư mục `backups` nằm trên cùng máy chủ: **nên đồng bộ thêm ra 
 | Lệnh artisan | `make prod-artisan c="..."` |
 | Đặt lại mật khẩu admin | `make prod-artisan c="app:create-admin"` (nhập lại email cũ) |
 | Bảo trì | `make prod-artisan c="down"` / `c="up"` |
+
+## 8. Bản demo chỉ xem (tuỳ chọn)
+
+Dùng khi deploy bản giới thiệu cho khách xem (quán mẫu, không ghi được dữ liệu):
+
+1. `.env`: `DEMO_MODE=true`, `DEMO_RESET_AT=04:00`, `MAIL_MAILER=log`. Không điền secret thật.
+2. Nạp dữ liệu mẫu: `make prod-artisan c="demo:reset --force"` (xoá toàn bộ database rồi seed lại).
+3. Làm mới dữ liệu mỗi ngày: image production không chạy scheduler, thêm cron trên máy chủ:
+
+   ```cron
+   0 4 * * * cd /đường-dẫn/quan_an_mini && docker compose -f compose.prod.yaml exec -T app sh -c "php artisan demo:reset --force && php artisan optimize && php artisan filament:optimize" >/dev/null 2>&1
+   ```
+
+   (`demo:reset` chạy `optimize:clear` nên chạy lại `optimize` cho nhanh.) Bản demo đặt "Cho phép Google tìm thấy website" = tắt (`robots.txt` chặn toàn bộ).
+

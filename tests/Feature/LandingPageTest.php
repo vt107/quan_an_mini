@@ -128,6 +128,12 @@ class LandingPageTest extends TestCase
         $this->get('/robots.txt')->assertSee("Disallow: /\n", false);
     }
 
+    public function test_no_demo_widget_when_demo_mode_is_off(): void
+    {
+        $this->get('/')->assertOk()->assertDontSee('id="dmw"', false);
+        $this->get('/demo/switch/admin')->assertNotFound();
+    }
+
     public function test_vietnamese_error_page(): void
     {
         $this->get('/khong-ton-tai')->assertNotFound()->assertSee('Không tìm thấy trang');
